@@ -250,9 +250,16 @@ using namespace std;
         for(int i=0;i<z;i++)
             mapping[zcounts[i].second-1]=tcounts[i].second;
 
+        //initial state ready
+
         long long initial_cost = cost_fn();
+
+        vector<int> best_nbr;
+        for(int i=0; i<z; i++) best_nbr[i].push_back()
+        long long best_cost = initial_cost;
+
         pair <vector<int>,long long> best_nbr_pair = get_best_nbr(initial_cost);
-        while(best_nbr_pair.second<initial_cost){
+        while(best_nbr_pair.second < initial_cost) {
             initial_cost = best_nbr_pair.second;
             vector<int> nbr = best_nbr_pair.first;
             for(int i=0;i<z;++i){
@@ -260,6 +267,18 @@ using namespace std;
             }
             best_nbr_pair = get_best_nbr(initial_cost);
         }
+        // reached local max here
+        //get random permutation with heuristic as new start state
+        // keep finding best 
+        
+
+
+        //.....final assignment.......
+        for(int i=0;i<z;++i){
+                mapping[i]=best_nbr[i];
+        }
+
+
         // for(int i=0;i<z;++i){
         //     cout<<mapping[i]<<" ";
         // }
