@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <bits/stdc++.h>
+#include <random>
 
 using namespace std;
 
@@ -151,6 +152,30 @@ using namespace std;
         cout << "Allocation written to the file successfully." << endl;
     }
 
+    vector<int> SportsLayout::restart_state(vector<pair<int,int>> tcounts, vector<pair<int,int>> zcounts)
+    {
+         // Create a random number generator
+        random_device rd;
+        mt19937 gen(rd()); // Mersenne Twister engine
+        uniform_int_distribution<> zrand(0, z-1);
+        uniform_int_distribution<> lrand(0, l-1);
+        uniform_real_distribution<> triangular_dist(0, 1);
+        int swap_count = static_cast<int>(z * (1 - sqrt(triangular_dist(gen)))) + 2; // generates a random number between [0,z] biased towards 0 and gradually decreasing towards N
+        // cout << swap_count -2 <<endl;
+        while(swap_count)
+        {
+            int i1 = zrand(gen);
+            int i2 = lrand(gen);
+            swap(tcounts[i1], tcounts[i2]);
+            swap_count--;
+        }
+        vector<int> res(z, 0);
+        for(int i=0;i<z;i++)
+            {res[zcounts[i].second-1]=tcounts[i].second;}
+        return res;
+        
+    }
+
     long long SportsLayout::compute_cost(long long cur_cost,int index1, int index2){
         int location1 = mapping[index1];
         int location2 = mapping[index2];
@@ -255,7 +280,7 @@ using namespace std;
         long long initial_cost = cost_fn();
 
         vector<int> best_nbr;
-        for(int i=0; i<z; i++) best_nbr[i].push_back()
+        for(int i=0; i<z; i++) best_nbr.push_back(mapping[i]);
         long long best_cost = initial_cost;
 
         pair <vector<int>,long long> best_nbr_pair = get_best_nbr(initial_cost);
@@ -271,7 +296,9 @@ using namespace std;
         //get random permutation with heuristic as new start state
         // keep finding best 
         
-
+        vector<int> rest = restart_state(tcounts, zcounts);
+        cout<<"RESTART: \n";
+        for(auto x: rest) cout<<x<<" ";
 
         //.....final assignment.......
         for(int i=0;i<z;++i){
