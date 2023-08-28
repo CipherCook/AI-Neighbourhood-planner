@@ -1,4 +1,3 @@
-
 #ifndef SPORTSLAYOUT_H
 #define	SPORTSLAYOUT_H
 
@@ -32,6 +31,7 @@ class SportsLayout{
     long long compute_cost(long long cur_cost,int index1, int index2);
     long long compute_cost_outside(long long cur_cost,int index1, int location2);
     pair<vector<int>,long long> get_best_nbr(long long cur_cost);
+    vector<int> restart_state(vector<pair<int,int>> tcounts, vector<pair<int,int>> zcounts);
     void compute_allocation();
 
 
