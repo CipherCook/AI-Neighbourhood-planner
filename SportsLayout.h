@@ -29,8 +29,8 @@ class SportsLayout{
 
     void readInInputFile(string inputfilename);
 
-    long long compute_cost(long long cur_cost,int index1, int index2);
-    long long compute_cost_outside(long long cur_cost,int index1, int location2);
+    long long compute_cost(long long cur_cost,int index1, int index2, int location1, int location2 );
+    long long compute_cost_outside(long long cur_cost,int index1, int location2, int location1);
     pair<vector<int>,long long> get_best_nbr(long long cur_cost, vector<int> temp);
     vector<int> restart_state(vector<pair<int,int>> tcounts, vector<pair<int,int>> zcounts);
     long long getCost(vector<int> v);
