@@ -189,9 +189,8 @@ using namespace std;
         
     }
 
-    long long SportsLayout::compute_cost(long long cur_cost,int index1, int index2){
-        int location1 = mapping[index1];
-        int location2 = mapping[index2];
+    long long SportsLayout::compute_cost(long long cur_cost,int index1, int index2, int location1, int location2){
+        
         long long extra_cost = 0;
         for(int i=0;i<z;++i){
             if(i==index1 || i==index2)continue;
@@ -201,8 +200,8 @@ using namespace std;
         return cur_cost+extra_cost;
     }
 
-    long long SportsLayout::compute_cost_outside(long long cur_cost,int index1, int location2){
-        int location1 = mapping[index1];
+    long long SportsLayout::compute_cost_outside(long long cur_cost,int index1, int location2, int location1){
+        
         long long extra_cost = 0;
         for(int i=0;i<z;++i){
             if(i==index1) continue;
@@ -217,18 +216,23 @@ using namespace std;
         bool included[l+1] = {0}; //mapping is 0 based indexing but its y-values are 1-based
         for(int i=0;i<z;++i){
             included[temp[i]] = 1;
+            cout<<temp[i]<<" ";
         }
+        cout<<endl;
         vector<int> not_vis;
         for(int i=1; i<=l; i++)
         {
-            if(!included[i]) not_vis.push_back(i);
+            if(!included[i]) {not_vis.push_back(i); cout << i<<", ";}
         }
+        
 
         long long best_cost = LONG_MAX;
         int index1 = 0,index2 = 0;
         for(int i=0;i<z;++i){
             for(int j=i+1;j<z;++j){
-                long long possible_cost = compute_cost(cur_cost,i,j);
+                // cout<<i<<j<<temp[i]<<temp[j]<<endl;
+                long long possible_cost = compute_cost(cur_cost,i,j, temp[i], temp[j]);
+                // cout <<i<< " " << j << " " << possible_cost <<endl;
                 if(possible_cost<best_cost){
                     best_cost = possible_cost;
                     index1 = i;
@@ -243,8 +247,9 @@ using namespace std;
         {
             for(auto j: not_vis)
             {
-                long long possible_cost = compute_cost_outside(cur_cost,i,j);
-                cout << i<< " " << j<< " "<<possible_cost<<endl;
+                int location1 = temp[i];
+                long long possible_cost = compute_cost_outside(cur_cost,i,j, location1);
+                // cout << i<< " " << j<< " "<<possible_cost<<endl;
                 if(possible_cost<best_cost){
                     best_cost = possible_cost;
                     index1 = i;
@@ -310,14 +315,22 @@ using namespace std;
         //get random permutation with heuristic as new start state
         // keep finding best 
         int iters = 0;
-        while(iters < 10)
+        while(iters < 2)
         {
             vector<int> start_state = restart_state(tcounts, zcounts);
+            cout<<"RESTART: \n";
+            for(auto x: start_state) cout<<x<<" ";
+            cout<<'\n';
             long long cur_cost = getCost(start_state);
+            cout << cur_cost << endl;
+            
             pair <vector<int>,long long> greedy_nbr = get_best_nbr(cur_cost, start_state);
+            cout << "nbr_cost = " << greedy_nbr.second<<endl;
+            // break;
             while(greedy_nbr.second < cur_cost) {
                 cur_cost = greedy_nbr.second;
                 vector<int> nbr = greedy_nbr.first;
+                
                 if(cur_cost > best_cost)
                 {
                     for(int i=0;i<z;++i){
@@ -325,7 +338,10 @@ using namespace std;
                     }
                     best_cost = cur_cost;
                 }
+                cout << "cur_cost = "<< cur_cost << endl;
                 greedy_nbr = get_best_nbr(cur_cost, nbr);
+                cout << "nbr_cost = " << greedy_nbr.second<<endl;
+                if(cur_cost < -100) break;
             }
             iters++;
         }
@@ -333,8 +349,8 @@ using namespace std;
 
 
         vector<int> rest = restart_state(tcounts, zcounts);
-        cout<<"RESTART: \n";
-        for(auto x: rest) cout<<x<<" ";
+        // cout<<"RESTART: \n";
+        // for(auto x: rest) cout<<x<<" ";
 
         //.....final assignment.......
         for(int i=0;i<z;++i){
@@ -342,9 +358,9 @@ using namespace std;
         }
 
 
-        // for(int i=0;i<z;++i){
-        //     cout<<mapping[i]<<" ";
-        // }
-        // cout<<endl;
+        for(int i=0;i<z;++i){
+            cout<<mapping[i]<<" ";
+        }
+        cout<<endl;
 
     }
