@@ -91,6 +91,19 @@ using namespace std;
         return cost;
     }
 
+    long long SportsLayout::getCost(vector<int> v)
+    {
+        long long cost=0;
+        for(int i=0;i<z;i++)
+        {
+           for(int j=0;j<z;j++)
+           {
+                cost+=(long long)N[i][j]*(long long)T[v[i]-1][v[j]-1];
+           }
+        }
+        return cost;
+    }
+
     void SportsLayout::readInInputFile(string inputfilename)
     {
         fstream ipfile;
@@ -200,12 +213,10 @@ using namespace std;
 
 
 
-    pair<vector<int>,long long> SportsLayout::get_best_nbr(long long cur_cost){
-        vector<int> temp;
+    pair<vector<int>,long long> SportsLayout::get_best_nbr(long long cur_cost, vector<int> temp){
         bool included[l+1] = {0}; //mapping is 0 based indexing but its y-values are 1-based
         for(int i=0;i<z;++i){
-            temp.push_back(mapping[i]);
-            included[mapping[i]] = 1;
+            included[temp[i]] = 1;
         }
         vector<int> not_vis;
         for(int i=1; i<=l; i++)
@@ -250,6 +261,8 @@ using namespace std;
 
     void SportsLayout::compute_allocation()
     {
+        // time_t start, end;
+        // time(&start);
         vector<pair<int,int>> zcounts(z ,{0,0});
         for(int i=0; i<z; i++)
         {
@@ -283,19 +296,42 @@ using namespace std;
         for(int i=0; i<z; i++) best_nbr.push_back(mapping[i]);
         long long best_cost = initial_cost;
 
-        pair <vector<int>,long long> best_nbr_pair = get_best_nbr(initial_cost);
-        while(best_nbr_pair.second < initial_cost) {
-            initial_cost = best_nbr_pair.second;
-            vector<int> nbr = best_nbr_pair.first;
+        pair <vector<int>,long long> greedy_nbr = get_best_nbr(initial_cost, best_nbr);
+        while(greedy_nbr.second < initial_cost) {
+            initial_cost = greedy_nbr.second;
+            vector<int> nbr = greedy_nbr.first;
             for(int i=0;i<z;++i){
                 mapping[i]=nbr[i];
             }
-            best_nbr_pair = get_best_nbr(initial_cost);
+            greedy_nbr = get_best_nbr(initial_cost, nbr);
         }
+        best_cost = initial_cost;
         // reached local max here
         //get random permutation with heuristic as new start state
         // keep finding best 
-        
+        int iters = 0;
+        while(iters < 10)
+        {
+            vector<int> start_state = restart_state(tcounts, zcounts);
+            long long cur_cost = getCost(start_state);
+            pair <vector<int>,long long> greedy_nbr = get_best_nbr(cur_cost, start_state);
+            while(greedy_nbr.second < cur_cost) {
+                cur_cost = greedy_nbr.second;
+                vector<int> nbr = greedy_nbr.first;
+                if(cur_cost > best_cost)
+                {
+                    for(int i=0;i<z;++i){
+                        mapping[i]=nbr[i];
+                    }
+                    best_cost = cur_cost;
+                }
+                greedy_nbr = get_best_nbr(cur_cost, nbr);
+            }
+            iters++;
+        }
+
+
+
         vector<int> rest = restart_state(tcounts, zcounts);
         cout<<"RESTART: \n";
         for(auto x: rest) cout<<x<<" ";
