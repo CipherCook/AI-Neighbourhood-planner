@@ -251,6 +251,7 @@ void __f (const char* names, Arg1&& arg1, Args&&... args)
             }
         }
         swap(temp[index1],temp[index2]);
+        cur_cost = getCost(temp);
         // cout << "after computing inside, best cost = " << best_cost << endl;
         // cout << "actua best_cost = " << getCost(temp) << endl;
         index1 = -1;
