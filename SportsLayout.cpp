@@ -5,6 +5,18 @@
 
 using namespace std;
 
+#define bug(...)       __f (#__VA_ARGS__, __VA_ARGS__)
+#define print(a)       for(auto x : a) cout << x << " "; cout << endl
+
+template <typename Arg1>
+void __f (const char* name, Arg1&& arg1) { cout << name << " : " << arg1 << endl; }
+template <typename Arg1, typename... Args>
+void __f (const char* names, Arg1&& arg1, Args&&... args)
+{
+    const char* comma = strchr (names + 1, ',');
+    cout.write (names, comma - names) << " : " << arg1 << " | "; __f (comma + 1, args...);
+}
+
 #include "SportsLayout.h"
 
     SportsLayout::SportsLayout(string inputfilename)
@@ -189,23 +201,24 @@ using namespace std;
         
     }
 
-    long long SportsLayout::compute_cost(long long cur_cost,int index1, int index2, int location1, int location2){
-        
+    long long SportsLayout::compute_cost(long long cur_cost,int index1, int index2, vector<int> temp){
+        int location1 = temp[index1];
+        int location2 = temp[index2];
         long long extra_cost = 0;
         for(int i=0;i<z;++i){
             if(i==index1 || i==index2)continue;
-            extra_cost+=(N[i][index1]-N[i][index2])*(T[mapping[i]-1][location2-1]-T[mapping[i]-1][location1-1]);
-            extra_cost+=(N[index1][i]-N[index2][i])*(T[location2-1][mapping[i]-1]-T[location1-1][mapping[i]-1]);
+            extra_cost+=(N[i][index1]-N[i][index2])*(T[temp[i]-1][location2-1]-T[temp[i]-1][location1-1]);
+            extra_cost+=(N[index1][i]-N[index2][i])*(T[location2-1][temp[i]-1]-T[location1-1][temp[i]-1]);
         }
         return cur_cost+extra_cost;
     }
 
-    long long SportsLayout::compute_cost_outside(long long cur_cost,int index1, int location2, int location1){
-        
+    long long SportsLayout::compute_cost_outside(long long cur_cost,int index1, int location2, vector<int> temp){
+        int location1 = temp[index1];
         long long extra_cost = 0;
         for(int i=0;i<z;++i){
             if(i==index1) continue;
-            extra_cost+=(N[i][index1]+N[index1][i])*(T[mapping[i]-1][location2-1]-T[mapping[i]-1][location1-1]);
+            extra_cost+=(N[i][index1]+N[index1][i])*(T[temp[i]-1][location2-1]-T[temp[i]-1][location1-1]);
         }
         return cur_cost+extra_cost;
     }
@@ -216,13 +229,12 @@ using namespace std;
         bool included[l+1] = {0}; //mapping is 0 based indexing but its y-values are 1-based
         for(int i=0;i<z;++i){
             included[temp[i]] = 1;
-            cout<<temp[i]<<" ";
+            
         }
-        cout<<endl;
         vector<int> not_vis;
         for(int i=1; i<=l; i++)
         {
-            if(!included[i]) {not_vis.push_back(i); cout << i<<", ";}
+            if(!included[i]) {not_vis.push_back(i); }
         }
         
 
@@ -230,9 +242,7 @@ using namespace std;
         int index1 = 0,index2 = 0;
         for(int i=0;i<z;++i){
             for(int j=i+1;j<z;++j){
-                // cout<<i<<j<<temp[i]<<temp[j]<<endl;
-                long long possible_cost = compute_cost(cur_cost,i,j, temp[i], temp[j]);
-                // cout <<i<< " " << j << " " << possible_cost <<endl;
+                long long possible_cost = compute_cost(cur_cost,i,j, temp);
                 if(possible_cost<best_cost){
                     best_cost = possible_cost;
                     index1 = i;
@@ -241,14 +251,15 @@ using namespace std;
             }
         }
         swap(temp[index1],temp[index2]);
+        // cout << "after computing inside, best cost = " << best_cost << endl;
+        // cout << "actua best_cost = " << getCost(temp) << endl;
         index1 = -1;
         int loc = -1;
         for(int i=0; i<z; i++)
         {
             for(auto j: not_vis)
             {
-                int location1 = temp[i];
-                long long possible_cost = compute_cost_outside(cur_cost,i,j, location1);
+                long long possible_cost = compute_cost_outside(cur_cost,i,j, temp);
                 // cout << i<< " " << j<< " "<<possible_cost<<endl;
                 if(possible_cost<best_cost){
                     best_cost = possible_cost;
@@ -297,66 +308,72 @@ using namespace std;
 
         long long initial_cost = cost_fn();
 
-        vector<int> best_nbr;
-        for(int i=0; i<z; i++) best_nbr.push_back(mapping[i]);
+        vector<int> greedy_start;
+        for(int i=0; i<z; i++) greedy_start.push_back(mapping[i]);
         long long best_cost = initial_cost;
 
-        pair <vector<int>,long long> greedy_nbr = get_best_nbr(initial_cost, best_nbr);
+        pair <vector<int>,long long> greedy_nbr = get_best_nbr(initial_cost, greedy_start);
+        cout << "\nGreedy start = ";
+        print(greedy_start);
+        bug(initial_cost);
         while(greedy_nbr.second < initial_cost) {
+            cout<<"next uphill: ";
             initial_cost = greedy_nbr.second;
+            bug(initial_cost);
             vector<int> nbr = greedy_nbr.first;
+            print(nbr);
             for(int i=0;i<z;++i){
                 mapping[i]=nbr[i];
             }
             greedy_nbr = get_best_nbr(initial_cost, nbr);
         }
         best_cost = initial_cost;
-        // reached local max here
-        //get random permutation with heuristic as new start state
-        // keep finding best 
+        
         int iters = 0;
-        while(iters < 2)
+        while(iters < 1000)
         {
             vector<int> start_state = restart_state(tcounts, zcounts);
-            cout<<"RESTART: \n";
-            for(auto x: start_state) cout<<x<<" ";
-            cout<<'\n';
+            cout<<"\nRestart state: ";
+            print(start_state);
             long long cur_cost = getCost(start_state);
-            cout << cur_cost << endl;
-            
             pair <vector<int>,long long> greedy_nbr = get_best_nbr(cur_cost, start_state);
-            cout << "nbr_cost = " << greedy_nbr.second<<endl;
-            // break;
+            
             while(greedy_nbr.second < cur_cost) {
                 cur_cost = greedy_nbr.second;
                 vector<int> nbr = greedy_nbr.first;
-                
-                if(cur_cost > best_cost)
+                cout <<"next uphill: ";
+                print(nbr);
+                if(cur_cost < best_cost)
                 {
                     for(int i=0;i<z;++i){
                         mapping[i]=nbr[i];
                     }
                     best_cost = cur_cost;
+                    bug(best_cost);
                 }
-                cout << "cur_cost = "<< cur_cost << endl;
                 greedy_nbr = get_best_nbr(cur_cost, nbr);
-                cout << "nbr_cost = " << greedy_nbr.second<<endl;
-                if(cur_cost < -100) break;
             }
             iters++;
         }
+        // vector<int> test = restart_state(tcounts, zcounts);
+        // long long testcost = getCost(test);
+        // int incl[6] = {0};
+        // for(auto x: test) {cout <<x<<" "; incl[x] = 1;}
+        // cout<<'\n'<<getCost(test)<<endl;
+        // for(int i=0; i<3; i++)
+        // {
+        //     for(int j=1; j<=5; j++)
+        //     {
+        //         if(incl[j]) continue;
+        //         bug(i,j);
+        //         vector<int> temp = test;
+        //         cout << compute_cost_outside(testcost, i, j, temp)<<endl;
+        //         temp[i] = j;
+        //         cout << getCost(temp) << endl;
+        //     }
+        // }
 
-
-
-        vector<int> rest = restart_state(tcounts, zcounts);
-        // cout<<"RESTART: \n";
-        // for(auto x: rest) cout<<x<<" ";
-
-        //.....final assignment.......
-        for(int i=0;i<z;++i){
-                mapping[i]=best_nbr[i];
-        }
-
+        
 
         for(int i=0;i<z;++i){
             cout<<mapping[i]<<" ";
