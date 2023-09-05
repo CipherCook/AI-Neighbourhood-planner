@@ -1,7 +1,7 @@
 
 #ifndef SPORTSLAYOUT_H
 #define	SPORTSLAYOUT_H
-
+#define ll long long
 #include <fstream>
 #include <iostream>
 #include <bits/stdc++.h>
@@ -10,11 +10,11 @@ using namespace std;
 class SportsLayout{
 
     private:
-    int z,l;
-    int** T;
-    int **N;
-    int time;
-    int *mapping;
+    ll z,l;
+    ll** T;
+    ll **N;
+    ll time;
+    ll *mapping;
 
     public:
     SportsLayout(string inputfilename);
@@ -29,11 +29,11 @@ class SportsLayout{
 
     void readInInputFile(string inputfilename);
 
-    long long compute_cost(long long cur_cost,int index1, int index2, int location1, int location2 );
-    long long compute_cost_outside(long long cur_cost,int index1, int location2, int location1);
-    pair<vector<int>,long long> get_best_nbr(long long cur_cost, vector<int> temp);
-    vector<int> restart_state(vector<pair<int,int>> tcounts, vector<pair<int,int>> zcounts);
-    long long getCost(vector<int> v);
+    long long compute_cost(long long cur_cost,ll index1, ll index2, vector<ll> temp );
+    long long compute_cost_outside(long long cur_cost,ll index1, ll location2, vector<ll> temp);
+    pair<vector<ll>,long long> get_best_nbr(long long cur_cost, vector<ll> temp);
+    vector<ll> restart_state(vector<pair<ll,ll>> tcounts, vector<pair<ll,ll>> zcounts);
+    long long getCost(vector<ll> v);
     void compute_allocation();
 
 
