@@ -215,7 +215,7 @@ void __f (const char* names, Arg1&& arg1, Args&&... args)
                 }
                 if(jumps>7 && (l>=600 || z*(l-z) > 250000)){  break;}
                 else if(jumps>12 && (l>=300 || z*(l-z) > 50000)){  break;}
-                else if(jumps>12 && l>=100) {break;}
+                else if(jumps>18 && l>=100) {break;}
             }
         }
         swap(temp[index1],temp[index2]);
