@@ -1,3 +1,5 @@
+Project Problem Statement - https://www.cse.iitd.ac.in/~mausam/courses/col333/autumn2023/A1/A1.pdf
+
 # COL333_AI_A1
 Functionalities created:
 1. Intelligent restart state choosing - Chooses a state _slightly differing_ from the greedy original state. The differing amount is decided by number of swaps between 0+2 to Z+2 with probability distribution skewed towards the left.
